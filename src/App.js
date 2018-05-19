@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
 import Pot from './components/Pot';
+import Container from './components/Container';
+import Wrapper from './components/Wrapper';
 import _ from 'lodash';
 
 const MOUSE_MOVE_MODIFIER = 0.125;
@@ -18,6 +20,11 @@ class App extends Component {
         value: 0,
         range: [0, 127],
         name: 'attack'
+      },
+      coarse: {
+        value: 0,
+        range: [-63, 64],
+        name: 'coarse'
       },
       waveform: {
         value: 0,
@@ -54,9 +61,9 @@ class App extends Component {
         diff = Math.floor(Math.abs(mouseCurrent - mousePos) * MOUSE_MOVE_MODIFIER);
       }
       if (mouseCurrent < mousePos) {
-        newValue = startValue + diff
+        newValue = startValue + diff;
       } else if (mouseCurrent > mousePos) {
-        newValue = startValue - diff
+        newValue = startValue - diff;
       }
       if (newValue > upperLimit) {
         newValue = upperLimit;
@@ -65,7 +72,7 @@ class App extends Component {
       }
 
       if (newValue !== startValue) {
-        let change = this.state;
+        const change = this.state;
         change[grabbedParam].value = newValue;
         change.mousePos = mouseCurrent;
         const newState = _.extend(this.state, change);
@@ -86,32 +93,42 @@ class App extends Component {
   }
 
   render() {
-    const { volume, attack, waveform } = this.state
+    const { volume, attack, waveform, coarse } = this.state
     return (
       <div
       onMouseDown={(e) => this.handleClick(e)}
       onMouseMove={(e) => this.mouseMove(e)}
       onMouseUp={(e) => this.release(e)}
       className="App">
-        <Pot
-          size={80}
-          position={[200, 200]}
-          parameter={volume}
-          onGrab={this.grabBinder}
-        />
-
-        <Pot
-          size={80}
-          position={[280, 200]}
-          parameter={attack}
-          onGrab={this.grabBinder}
-        />
-        <Pot
-          size={80}
-          position={[360, 200]}
-          parameter={waveform}
-          onGrab={this.grabBinder}
-        />
+      <Container>
+        <Wrapper>
+          <Pot
+            size={80}
+            position={[0, 0]}
+            parameter={volume}
+            onGrab={this.grabBinder}
+          />
+           <Pot
+            size={80}
+            position={[80, 0]}
+            parameter={attack}
+            onGrab={this.grabBinder}
+          />
+          <Pot
+            size={80}
+            position={[160, 0]}
+            parameter={waveform}
+            onGrab={this.grabBinder}
+          />
+          <Pot
+            size={80}
+            position={[240, 0]}
+            parameter={coarse}
+            onGrab={this.grabBinder}
+          />
+        </Wrapper>
+      </Container>
+       
       </div>
     );
   }

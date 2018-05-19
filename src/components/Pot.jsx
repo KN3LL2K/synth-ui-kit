@@ -9,44 +9,40 @@ class Pot extends Component {
     };
     this.handleGrab = this.handleGrab.bind(this);
     this.resetGrab = this.resetGrab.bind(this);
-    this.debouncedResetGrab = _.debounce(this.resetGrab, 2000);
+    this.debouncedResetGrab = _.debounce(this.resetGrab, 1000);
   }
 
   resetGrab() {
     this.setState({isGrabbed: false});
   }
+  
+  componentWillReceiveProps() {
+    this.debouncedResetGrab();
+  }
 
   handleGrab() {
     this.setState({isGrabbed: true});
-    this.debouncedResetGrab();
+    
     this.props.onGrab(this.props.parameter.name);
   }
 
   translate(param) {
-    const { value, range, stepped, options } = param
-    let translatedValue = 0;
+    const { value, range, stepped, options } = param;
+    let potRange = 260;
+    let percentValue = value / range[1];
     if (stepped) {
       const steps = options.length;
       const step = 45;
-      let potRange = (steps - 1) * step;
-      let percentValue = value / range[1];
-      translatedValue = ((percentValue * potRange) - potRange/2).toFixed(0);
-    } else {
-      let potRange = 260;
-      let percentValue = value / range[1];
-      translatedValue = ((percentValue * potRange) - 130).toFixed(0);
+      potRange = (steps - 1) * step;
     }
-    return translatedValue;
+    return ((percentValue * potRange) - potRange / 2).toFixed(0);
   }
 
   drawNotches(option, index, steps, size) {
     const angleOffset = 45;
-    let startAngle = -Math.abs((((steps - 1) * 45) / 2));
-    if (steps % 2 === 0) {
-      startAngle = -Math.abs((((steps - 1) * 45)/ 2));
-    }
-    let step = 45 * index;
-    let angle = startAngle + step;
+    const startAngle = -Math.abs((((steps - 1) * 45) / 2));
+    const step = 45 * index;
+    const angle = startAngle + step;
     const style = {
       height: '5%',
       width: '5%',
@@ -56,10 +52,9 @@ class Pot extends Component {
       backgroundColor: `#0f0f0f`,
       position: 'absolute',
       transformOrigin: `500% 500%`,
-      transform: `rotate(${angle + angleOffset}deg)`,
-      overflow: 'visible'
+      transform: `rotate(${angle + angleOffset}deg)`
     };
-    return (<div style={style} key={index}></div>)
+    return (<div style={style} key={index}></div>);
   }
 
   render() {
@@ -74,8 +69,7 @@ class Pot extends Component {
         top: `${position[1]}px`,
         height: `${size}px`,
         width: `${size}px`,
-        position: 'absolute',
-        backgroundColor: 'lightGrey'
+        position: 'absolute'
       },
       wrapper: {
         height: '50%',
@@ -83,7 +77,6 @@ class Pot extends Component {
         top: '25%',
         left: '25%',
         position: 'relative',
-        transform: `translate(-50%, -50%)`,
         transform: `rotate(${degrees}deg)`
       },
       body: {
@@ -126,6 +119,6 @@ class Pot extends Component {
       </div>
     );
   }
-}
+};
 
 export default Pot;
