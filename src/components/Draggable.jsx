@@ -27,12 +27,15 @@ class Draggable extends Component {
     const mouseCurrent = e.clientY;
     if (isGrabbed) {
       const delta = Math.abs(mouseCurrent - mousePos);
+      let updated;
       if (mouseCurrent < mousePos) {
-        update(delta);
+        updated = update(delta);
       } else if (mouseCurrent > mousePos) {
-        update(-delta);
+        updated = update(-delta);
       }
-      this.setState({mousePos: mouseCurrent});
+      if (updated) {
+        this.setState({mousePos: mouseCurrent});
+      }
     }
   }
 

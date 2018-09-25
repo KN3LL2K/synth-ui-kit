@@ -69,16 +69,7 @@ class App extends Component {
     if (param) {
       let { value, range, stepped } = param;
       if (stepped) {
-        // this needs adjusting or completely refactoring to
-        // adjust how the 'stepped' Pot's behave when adjusting
-        // currently way too 'jumpy'
-        if (delta < 0 && delta > -20) {
-          delta = -1;
-        } else if (delta > 0 && delta < 20) {
-          delta = 1;
-        } else {
-          delta = 0;
-        }
+        delta = Math.floor(delta * MOUSE_MOVE_MODIFIER);
       }
       let newValue = value + delta;
       const upperLimit = range[1];
@@ -93,6 +84,9 @@ class App extends Component {
         change[grabbedParam].value = newValue;
         const newState = _.extend(this.state, change);
         this.setState(newState);
+        return true;
+      } else {
+        return false;
       }
     }
   }
