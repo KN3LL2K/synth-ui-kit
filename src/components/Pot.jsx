@@ -1,27 +1,13 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
 
 class Pot extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      isGrabbed: false
-    };
-    this.handleGrab = this.handleGrab.bind(this);
-    this.resetGrab = this.resetGrab.bind(this);
-    this.debouncedResetGrab = _.debounce(this.resetGrab, 500);
-  }
 
-  resetGrab() {
-    this.setState({isGrabbed: false});
-  }
-  
-  componentWillReceiveProps() {
-    this.debouncedResetGrab();
+    this.handleGrab = this.handleGrab.bind(this);
   }
 
   handleGrab() {
-    this.setState({isGrabbed: true});
     this.props.onGrab(this.props.parameter.name);
   }
 
@@ -43,9 +29,9 @@ class Pot extends Component {
     }
   }
 
-  drawNotch(option, index, steps, size) {
+  drawNotch(index, steps, option) {
     const angleOffset = 45;
-    const startAngle = -Math.abs((((steps - 1) * 45) / 2));
+    const startAngle = -Math.abs((steps - 1) * 45 / 2);
     const step = 45 * index;
     const angle = startAngle + step;
     const style = {
@@ -63,8 +49,7 @@ class Pot extends Component {
   }
 
   render() {
-    const { size, position, parameter } = this.props;
-    const { isGrabbed } = this.state;
+    const { size, position, parameter, isGrabbed } = this.props;
 
     const degrees = this.translateValue(parameter);
     
@@ -119,7 +104,7 @@ class Pot extends Component {
             <div style={styles.indicator}></div>
           </div>
         </div>
-        {parameter.options ? parameter.options.map((item, i) => this.drawNotch(item, i, parameter.options.length, size)) : '' }
+        {parameter.options ? parameter.options.map((item, i) => this.drawNotch(i, parameter.options.length, item)) : '' }
         <div style={styles.label}>
           {parameter.options ? `${parameter.options[parameter.value]}` : isGrabbed ? `${parameter.value}` : `${parameter.name}`}
         </div>

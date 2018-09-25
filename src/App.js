@@ -6,7 +6,7 @@ import Wrapper from './components/Wrapper';
 import Draggable from './components/Draggable';
 import _ from 'lodash';
 
-const MOUSE_MOVE_MODIFIER = 0.15;
+const MOUSE_MOVE_MODIFIER = 0.125;
 
 class App extends Component {
   constructor(props) {
@@ -49,18 +49,12 @@ class App extends Component {
         options: ['sine', 'square', 'saw', 'noise'],
         name: 'waveform'
       },
-      mousePos: 0,
-      isGrabbed: false,
       grabbedParam: null
     }
 
-    this.grabBinder = this.grabBinder.bind(this);
+    this.bindGrabbedParam = this.bindGrabbedParam.bind(this);
     this.clearGrabbedParam = this.clearGrabbedParam.bind(this);
     this.update = this.update.bind(this);
-  }
-
-  componentWillUpdate(nextProps, nextState) {
-
   }
 
   update(delta, param) {
@@ -91,54 +85,39 @@ class App extends Component {
     }
   }
 
-  grabBinder(param) {
+  bindGrabbedParam(param) {
     this.setState({grabbedParam: param});
   }
 
-  clearGrabbedParam(e) {
+  clearGrabbedParam() {
     this.setState({grabbedParam: null});
   }
 
   render() {
-    const { volume, attack, decay, sustain, release, waveform, coarse, grabbedParam } = this.state;
+    const { decay, sustain, waveform, coarse, grabbedParam } = this.state;
+    const params = [ waveform, decay, sustain, coarse ];
     return (
-      <div
-        className="App"
+      <Draggable
+        update={this.update}
+        clearGrabbedParam={this.clearGrabbedParam}
       >
-        <Draggable
-          update={this.update}
-          clearGrabbedParam={(e) => this.clearGrabbedParam(e)}
-        >
-          <Container>
-            <Wrapper>
-              <Pot
-                size={80}
-                position={[0, 0]}
-                parameter={waveform}
-                onGrab={this.grabBinder}
-              />
-              <Pot
-                size={80}
-                position={[80, 0]}
-                parameter={decay}
-                onGrab={this.grabBinder}
-              />
-              <Pot
-                size={80}
-                position={[160, 0]}
-                parameter={sustain}
-                onGrab={this.grabBinder}
-              />
-              <Pot
-                size={80}
-                position={[240, 0]}
-                parameter={release}
-                onGrab={this.grabBinder}
-              />
-            </Wrapper>
-          </Container>
-        </Draggable>
-      </div>
+        <Container>
+          <Wrapper>
+            {params.map((param, i) => {
+              return (
+                <Pot
+                  key={i}
+                  size={80}
+                  position={[80 * i, 0]}
+                  parameter={param}
+                  onGrab={this.bindGrabbedParam}
+                  isGrabbed={grabbedParam === param.name}
+                />
+              )
+            })}
+          </Wrapper>
+        </Container>
+      </Draggable>
     );
   }
 }
