@@ -6,9 +6,9 @@ class Container extends Component {
 
     const styles = {
       wrapper: {
-        'width': '360px',
-        'height': '120px',
-        'top': '100px',
+        width: '360px',
+        height: '120px',
+        top: '100px',
         left: '100px',
         position: 'absolute',
         backgroundColor: 'lightgreen',

@@ -6,8 +6,8 @@ class Wrapper extends Component {
 
     const styles = {
       wrapper: {
-        'width': '320px',
-        'height': '80px',
+        width: '320px',
+        height: '80px',
         top: '20px',
         left: '20px',
         position: 'relative',

@@ -9,7 +9,7 @@ class Pot extends Component {
     };
     this.handleGrab = this.handleGrab.bind(this);
     this.resetGrab = this.resetGrab.bind(this);
-    this.debouncedResetGrab = _.debounce(this.resetGrab, 1000);
+    this.debouncedResetGrab = _.debounce(this.resetGrab, 500);
   }
 
   resetGrab() {
@@ -22,23 +22,28 @@ class Pot extends Component {
 
   handleGrab() {
     this.setState({isGrabbed: true});
-    
     this.props.onGrab(this.props.parameter.name);
   }
 
-  translate(param) {
+  translateValue(param) {
     const { value, range, stepped, options } = param;
     let potRange = 260;
-    let percentValue = value / range[1];
+  
+    let percentValue = value / (range[1] - range[0]);
     if (stepped) {
       const steps = options.length;
       const step = 45;
       potRange = (steps - 1) * step;
     }
-    return ((percentValue * potRange) - potRange / 2).toFixed(0);
+
+    if (range[0] < 0) {
+      return (percentValue * potRange).toFixed(0);
+    } else {
+      return ((percentValue * potRange) - potRange / 2).toFixed(0);
+    }
   }
 
-  drawNotches(option, index, steps, size) {
+  drawNotch(option, index, steps, size) {
     const angleOffset = 45;
     const startAngle = -Math.abs((((steps - 1) * 45) / 2));
     const step = 45 * index;
@@ -61,7 +66,7 @@ class Pot extends Component {
     const { size, position, parameter } = this.props;
     const { isGrabbed } = this.state;
 
-    const degrees = this.translate(parameter);
+    const degrees = this.translateValue(parameter);
     
     const styles = {
       container: {
@@ -114,8 +119,10 @@ class Pot extends Component {
             <div style={styles.indicator}></div>
           </div>
         </div>
-        {parameter.options ? parameter.options.map((item, i) => this.drawNotches(item, i, parameter.options.length, size)) : '' }
-        <div style={styles.label}>{parameter.options ? `${parameter.options[parameter.value]}` : isGrabbed ? `${parameter.value}` : `${parameter.name}`}</div>
+        {parameter.options ? parameter.options.map((item, i) => this.drawNotch(item, i, parameter.options.length, size)) : '' }
+        <div style={styles.label}>
+          {parameter.options ? `${parameter.options[parameter.value]}` : isGrabbed ? `${parameter.value}` : `${parameter.name}`}
+        </div>
       </div>
     );
   }

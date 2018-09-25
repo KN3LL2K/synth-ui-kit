@@ -3,9 +3,10 @@ import './App.css';
 import Pot from './components/Pot';
 import Container from './components/Container';
 import Wrapper from './components/Wrapper';
+import Draggable from './components/Draggable';
 import _ from 'lodash';
 
-const MOUSE_MOVE_MODIFIER = 0.125;
+const MOUSE_MOVE_MODIFIER = 0.15;
 
 class App extends Component {
   constructor(props) {
@@ -20,6 +21,21 @@ class App extends Component {
         value: 0,
         range: [0, 127],
         name: 'attack'
+      },
+      decay: {
+        value: 0,
+        range: [0, 127],
+        name: 'decay'
+      },
+      sustain: {
+        value: 0,
+        range: [0, 127],
+        name: 'sustain'
+      },
+      release: {
+        value: 0,
+        range: [0, 127],
+        name: 'release'
       },
       coarse: {
         value: 0,
@@ -38,97 +54,96 @@ class App extends Component {
       grabbedParam: null
     }
 
-    this.handleClick = this.handleClick.bind(this);
-    this.mouseMove = this.mouseMove.bind(this);
     this.grabBinder = this.grabBinder.bind(this);
-    this.release = this.release.bind(this);
+    this.clearGrabbedParam = this.clearGrabbedParam.bind(this);
+    this.update = this.update.bind(this);
   }
 
-  handleClick(e) {
-    this.setState({mousePos: e.clientY, isGrabbed: true});
+  componentWillUpdate(nextProps, nextState) {
+
   }
 
-  mouseMove(e) {
-    const { isGrabbed, mousePos, grabbedParam } = this.state
-    const mouseCurrent = e.clientY;
-    if (isGrabbed && grabbedParam) {
-      const { value: startValue, range, stepped } = this.state[grabbedParam];
+  update(delta, param) {
+    const { grabbedParam } = this.state;
+    param = param || this.state[grabbedParam];
+    if (param) {
+      let { value, range, stepped } = param;
+      if (stepped) {
+        // this needs adjusting or completely refactoring to
+        // adjust how the 'stepped' Pot's behave when adjusting
+        // currently way too 'jumpy'
+        if (delta < 0 && delta > -20) {
+          delta = -1;
+        } else if (delta > 0 && delta < 20) {
+          delta = 1;
+        } else {
+          delta = 0;
+        }
+      }
+      let newValue = value + delta;
       const upperLimit = range[1];
       const lowerLimit = range[0];
-      let newValue = startValue;
-      let diff = Math.abs(mouseCurrent - mousePos);
-      if (stepped) {
-        diff = Math.floor(Math.abs(mouseCurrent - mousePos) * MOUSE_MOVE_MODIFIER);
-      }
-      if (mouseCurrent < mousePos) {
-        newValue = startValue + diff;
-      } else if (mouseCurrent > mousePos) {
-        newValue = startValue - diff;
-      }
       if (newValue > upperLimit) {
         newValue = upperLimit;
       } else if (newValue < lowerLimit) {
         newValue = lowerLimit;
       }
-
-      if (newValue !== startValue) {
+      if (newValue !== value) {
         const change = this.state;
         change[grabbedParam].value = newValue;
-        change.mousePos = mouseCurrent;
         const newState = _.extend(this.state, change);
         this.setState(newState);
       }
     }
   }
 
-  release(e) {
-    this.setState({
-      isGrabbed: false,
-      grabbedParam: null
-    });
-  }
-
   grabBinder(param) {
     this.setState({grabbedParam: param});
   }
 
+  clearGrabbedParam(e) {
+    this.setState({grabbedParam: null});
+  }
+
   render() {
-    const { volume, attack, waveform, coarse } = this.state
+    const { volume, attack, decay, sustain, release, waveform, coarse, grabbedParam } = this.state;
     return (
       <div
-      onMouseDown={(e) => this.handleClick(e)}
-      onMouseMove={(e) => this.mouseMove(e)}
-      onMouseUp={(e) => this.release(e)}
-      className="App">
-      <Container>
-        <Wrapper>
-          <Pot
-            size={80}
-            position={[0, 0]}
-            parameter={volume}
-            onGrab={this.grabBinder}
-          />
-           <Pot
-            size={80}
-            position={[80, 0]}
-            parameter={attack}
-            onGrab={this.grabBinder}
-          />
-          <Pot
-            size={80}
-            position={[160, 0]}
-            parameter={waveform}
-            onGrab={this.grabBinder}
-          />
-          <Pot
-            size={80}
-            position={[240, 0]}
-            parameter={coarse}
-            onGrab={this.grabBinder}
-          />
-        </Wrapper>
-      </Container>
-       
+        className="App"
+      >
+        <Draggable
+          update={this.update}
+          clearGrabbedParam={(e) => this.clearGrabbedParam(e)}
+        >
+          <Container>
+            <Wrapper>
+              <Pot
+                size={80}
+                position={[0, 0]}
+                parameter={waveform}
+                onGrab={this.grabBinder}
+              />
+              <Pot
+                size={80}
+                position={[80, 0]}
+                parameter={decay}
+                onGrab={this.grabBinder}
+              />
+              <Pot
+                size={80}
+                position={[160, 0]}
+                parameter={sustain}
+                onGrab={this.grabBinder}
+              />
+              <Pot
+                size={80}
+                position={[240, 0]}
+                parameter={release}
+                onGrab={this.grabBinder}
+              />
+            </Wrapper>
+          </Container>
+        </Draggable>
       </div>
     );
   }
